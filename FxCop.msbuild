@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>  
+
+<!--
+    MSBuild project example file that shows how to use the Git Clone task to clone a repository.
+    
+    Clone task uses the following parameters:
+    - RepositoryToClone (required)
+        This is the repository you wish to clone. This can be an URL 
+        (ie. https://WilbertOnGithub@github.com/WilbertOnGithub/MSBuildGitTasks.git) or a local Git repository 
+        (ie. c:\projects\repositorytoclone).
+    - TargetDirectory (required)
+        The directory where you want to put your local clone. 
+    - BranchToSwitchTo (optional)
+        A branch you want to switch to. If you do not use this parameter, git will always default to master.
+        Instead of a branch you can also switch to a specific SHA. 
+        
+    The Clone task returns the following output parameter:
+    - SHA
+        This returns the last SHA of the current branch of the cloned repository. This is useful because 
+        you would want to include the SHA into your build (for example in your assembly info files. It 
+        gives you the ability to pinpoint exactly what code was used to make the build.
+-->
+
+<Project DefaultTargets="StartCI" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" >
+
+
+
+  <UsingTask AssemblyFile="$(ToolsBasePath)\MSBuild.Extension.Pack.1.8.0\tools\net40\MSBuild.ExtensionPack.dll"
+             TaskName="MSBuild.ExtensionPack.CodeQuality.FxCop"
+               ></UsingTask>
+
+  <Target Name="FxCop">
+    <!-- Call the task using a collection of files and all default rules -->
+    <MSBuild.ExtensionPack.CodeQuality.FxCop TaskAction="Analyse" Files="@(Files)"
+                                             OutputFile="$(FxCopOutputFile)">
+      <Output TaskParameter="AnalysisFailed" PropertyName="Result"/>
+    </MSBuild.ExtensionPack.CodeQuality.FxCop>
+    <Message Text="CA1 Failed: $(Result)"/>
+    <!--Call the task using a project file-->
+    <!--<MSBuild.ExtensionPack.CodeQuality.FxCop TaskAction="Analyse"
+                                             Project="C:\Users\faiyaz.ganihar\Downloads\MSBuildGitTasks-master\MSBuildGitTasks-master\GitTasks\FxCop.FxCop"
+                                             DependencyDirectories="@(DependencyDirectories)"
+                                             OutputFile="$(FxCopOutputFile)">
+      <Output TaskParameter="AnalysisFailed" PropertyName="Result"/>
+    </MSBuild.ExtensionPack.CodeQuality.FxCop>-->
+    <Message Text="CA2 Failed: $(Result)"/>
+    <!-- Call the task using a collection of files and bespoke rules. We can access the exact failure message using OutputText -->
+    <MSBuild.ExtensionPack.CodeQuality.FxCop TaskAction="Analyse"
+                                             Rules="@(Rules)"
+                                             Files="@(Files)"
+                                             OutputFile="$(FxCopOutputFile)">
+      <Output TaskParameter="AnalysisFailed" PropertyName="Result"/>
+      <Output TaskParameter="OutputText" PropertyName="Text"/>
+    </MSBuild.ExtensionPack.CodeQuality.FxCop>
+    <Message Text="CA3 Failed: $(Result)"/>
+    <Message Text="Failure Text: $(Text)" Condition="$(Result) == 'true'"/>
+  </Target>
+
+
+
+</Project>

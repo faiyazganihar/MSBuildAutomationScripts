@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    MSBuild project example file that shows how to use the Git Clone task to clone a repository.
+    
+    Clone task uses the following parameters:
+    - RepositoryToClone (required)
+        This is the repository you wish to clone. This can be an URL 
+        (ie. https://WilbertOnGithub@github.com/WilbertOnGithub/MSBuildGitTasks.git) or a local Git repository 
+        (ie. c:\projects\repositorytoclone).
+    - TargetDirectory (required)
+        The directory where you want to put your local clone. 
+    - BranchToSwitchTo (optional)
+        A branch you want to switch to. If you do not use this parameter, git will always default to master.
+        Instead of a branch you can also switch to a specific SHA. 
+        
+    The Clone task returns the following output parameter:
+    - SHA
+        This returns the last SHA of the current branch of the cloned repository. This is useful because 
+        you would want to include the SHA into your build (for example in your assembly info files. It 
+        gives you the ability to pinpoint exactly what code was used to make the build.
+-->
+
+<Project DefaultTargets="" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" >
+
+  <ItemGroup>
+    <SolutionsToBuild Include="$(RootPath)\..\MSBuildGitTasks.sln" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <BuildFilesToCopy Include="$(MSBuildProjectFullPath)" />
+    <BuildFilesToCopy Include="$(ZipSourcePath)\*.*" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <DependencyDirectories Include="$(RootPath)\..\GitTasks\bin\Release"/>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Rules Include="$(ToolsBasePath)\Microsoft Fxcop 10.0\Rules\*.dll" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Files Include="$(RootPath)\..\GitTasks\bin\Release\GitTasks.dll"/>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <AssemblyToTest Include="$(RootPath)\..\UnitTests\bin\Debug\UnitTests.dll">
+      <TestAssembly>UnitTests.dll</TestAssembly>
+    </AssemblyToTest>
+    <AssemblyToTest Include="$(RootPath)\..\UnitTests\bin\Debug\UnitTests.dll">
+      <TestAssembly>UnitTests.dll</TestAssembly>
+    </AssemblyToTest>
+  </ItemGroup>
+
+  
+  <ItemGroup>
+    <StyleCopFiles Include="$(SrcBasePath)\**\*.cs">
+    </StyleCopFiles>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!--msbuild project file location-->
+    <RootPath>$(MSBuildProjectDirectory)</RootPath>
+
+    <!--Common msbuild target location for each CI step-->
+    <CommonLocation>$(RootPath)\CommonTargets</CommonLocation>
+    
+    <!--Help file will be generated for following source file-->
+    <DocumentationSources>
+      <DocumentationSource sourceFile="$(MSBuildProjectDirectory)\..\GitTasks\GitTasks.csproj" />
+    </DocumentationSources>
+   
+    <BuildArtifacts>$(RootPath)\BuildArtifacts</BuildArtifacts>
+    
+    <!--Build Bundle configurations-->
+    <SourceFilesToZip>$(BuildArtifacts)\ZipStaging</SourceFilesToZip>
+    <ZipSourcePath>$(SrcBasePath)\bin\Release</ZipSourcePath>
+    <ZipFileLocation>$(BuildArtifacts)</ZipFileLocation>
+    <ZipPath>$(ZipFileLocation)\Continuum.GitTasks.zip</ZipPath>
+    
+    <!--Tools used in CI-->
+    <ToolsBasePath>$(RootPath)\BuildTools</ToolsBasePath>
+
+    <!-- OpenCover -->
+    <!-- The tools path for OpenCover -->
+    <OpenCoverPath>$(ToolsBasePath)\OpenCover.4.6.519</OpenCoverPath>
+    <ReportGeneratorPath>$(ToolsBasePath)\ReportGenerator.2.4.5.0\tools</ReportGeneratorPath>
+    <!-- OpenCover report name and location -->
+    <OpenCoverOuputFile>$(BuildArtifacts)\UnitTestCoverage-Output.xml</OpenCoverOuputFile>
+    <OpenCoverTmpOuputFile>$(BuildArtifacts)\coverage-tmp-output.xml</OpenCoverTmpOuputFile>
+    <OpenCoverReportPath>$(BuildArtifacts)\UnitTestCoverageReport</OpenCoverReportPath>
+
+
+    <!-- NUnit -->
+    <!-- The tools path for NUnit -->
+    <NUnitPath>$(ToolsBasePath)\NUnit-2.6.4\NUnit-2.6.4\bin</NUnitPath>
+    <!-- NUnit report name and location -->
+    <NUnitOuputFile>$(BuildArtifacts)\NUnit-Output.xml</NUnitOuputFile>
+
+    <!--Source code against which the msbuild projects is being executed-->
+    <SrcBasePath>$(RootPath)\..\GitTasks</SrcBasePath>
+
+
+    <!-- StyleCop -->
+    <!-- The tools path for StyleCop -->
+    <StyleCopPath>$(ToolsBasePath)\StyleCop.4.7.33.0\lib\net35\</StyleCopPath>
+    <!-- The StyleCop report name and location -->
+    <StyleCopOutputFile>$(BuildArtifacts)\StyleCop-Output.xml</StyleCopOutputFile>
+    <!-- The StyleCop max violations count -->
+    <StyleCopMaxViolationCount>999</StyleCopMaxViolationCount>
+    <!-- StyleCop Force Full Analysis -->
+    <StyleCopForceFullAnalysis>true</StyleCopForceFullAnalysis>
+    <!-- StyleCop Treat Errors As Warnings -->
+    <StyleCopTreatErrorsAsWarnings>true</StyleCopTreatErrorsAsWarnings>
+    <!-- StyleCop Cache Results -->
+    <StyleCopCacheResults>false</StyleCopCacheResults>
+
+
+
+    <!-- FxCop -->
+    <!-- The FxCop report name and location -->
+    <FxCopOutputFile>$(BuildArtifacts)\FxCop-Output.xml</FxCopOutputFile>
+    <HelpProjectFile>$(RootPath)\SHFBDocumentation.shfbproj</HelpProjectFile>
+
+  </PropertyGroup>
+
+
+</Project>
