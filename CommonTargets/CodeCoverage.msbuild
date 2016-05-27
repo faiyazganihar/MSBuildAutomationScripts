@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>  
+
+<!--
+    MSBuild project example file that shows how to use the Git Clone task to clone a repository.
+    
+    Clone task uses the following parameters:
+    - RepositoryToClone (required)
+        This is the repository you wish to clone. This can be an URL 
+        (ie. https://WilbertOnGithub@github.com/WilbertOnGithub/MSBuildGitTasks.git) or a local Git repository 
+        (ie. c:\projects\repositorytoclone).
+    - TargetDirectory (required)
+        The directory where you want to put your local clone. 
+    - BranchToSwitchTo (optional)
+        A branch you want to switch to. If you do not use this parameter, git will always default to master.
+        Instead of a branch you can also switch to a specific SHA. 
+        
+    The Clone task returns the following output parameter:
+    - SHA
+        This returns the last SHA of the current branch of the cloned repository. This is useful because 
+        you would want to include the SHA into your build (for example in your assembly info files. It 
+        gives you the ability to pinpoint exactly what code was used to make the build.
+-->
+
+<Project DefaultTargets="StartCI" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" >
+
+
+
+  <!-- The Code Coverage Target, checks code coverage using opencover and NUnit, the 
+			task generates both a coverage report and the test report -->
+  <Target Name="CodeCoverage">
+
+
+    <!-- Define test assembly names in this ItemGroup.  Because ItemGroups are 'cumulative', the first line removes any existing items.-->
+    <ItemGroup>
+      <AssemblyToTest Remove="@(AssemblyToTest)" />
+      <AssemblyToTest Include="C:\Users\faiyaz.ganihar\Downloads\MSBuildGitTasks-master\MSBuildGitTasks-master\UnitTests\bin\Debug\UnitTests.dll">
+        <TestAssembly>UnitTests.dll</TestAssembly>
+      </AssemblyToTest>
+    </ItemGroup>
+
+    <Message Text="CodeCoverage" />
+
+    <Exec Command="&quot;$(OpenCoverPath)\OpenCover.Console.exe &quot; -register:user -target:&quot;$(NUnitPath)\nunit-console.exe&quot; -targetargs:&quot;/noshadow @(AssemblyToTest)&quot; -filter:+[*]* -output:&quot;$(OpenCoverOuputFile)&quot;" />
+
+    <Delete Files="TestResult.xml"></Delete>
+
+    <MakeDir Directories="$(OpenCoverReportPath)"/>
+
+    <Exec Command="&quot;$(ReportGeneratorPath)\ReportGenerator.exe &quot; &quot;$(OpenCoverOuputFile)&quot; &quot;$(OpenCoverReportPath)&quot;" />
+
+    <Message Text="CodeCoverage finished" />
+
+  </Target>
+
+
+</Project>
